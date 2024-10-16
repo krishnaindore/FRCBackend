@@ -4,6 +4,8 @@ const path = require('path');
 const readline = require('readline');
 const QRCode = require('qrcode');
 
+const fs = require('fs');
+
 const app = express();
 const port = 3000;
 
@@ -167,7 +169,12 @@ async function authenticateAndCreatePolicy() {
 // Call the function to authenticate and create the policy
 
 
+app.use('/static', express.static('public'));
 
+// Create the 'public' folder to store the generated QR codes if it doesn't exist
+if (!fs.existsSync('./public')) {
+    fs.mkdirSync('./public');
+}
 
 app.get('/', async(req, resp) => {
 
@@ -238,13 +245,31 @@ app.get('/', async(req, resp) => {
    
         // Generate QR code and send it as an image to the browser
         const qrCodeDataUrl = await QRCode.toDataURL(qrText);
+
+        const qrCodePath = path.join(__dirname, 'public', `${Date.now()}.png`);
+
+        // Generate the QR code and save it as an image file
+        await QRCode.toFile(qrCodePath, qrText);
+        const qrCodeUrl = `${req.protocol}://${req.get('host')}/static/${path.basename(qrCodePath)}`;
+
         
         // Send an HTML page displaying the QR code
-        resp.send(`
+        // resp.json(`
+
+        //      <h1>QR Code for: ${qrText}</h1>
           
-          <img src="${qrCodeDataUrl}" alt="QR Code">
+        //   <br><br>
+        //   <a href="/">Generate another QR code</a>
           
-        `);
+        //   <img src="${qrCodeDataUrl}" alt="QR Code">
+          
+        // `);
+
+        
+        resp.json({
+            message: 'QR code generated successfully',
+            qrCodeUrl: qrCodeUrl
+        });
 
 });
 
