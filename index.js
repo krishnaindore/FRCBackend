@@ -176,6 +176,45 @@ if (!fs.existsSync('./public')) {
     fs.mkdirSync('./public');
 }
 
+app.get('/list', async(req, resp) => {
+
+   
+    const androidmanagement = google.androidmanagement({ version: 'v1', auth: jwtClient });
+
+
+    try {
+
+
+        const enterprises = await androidmanagement.enterprises.list({
+            projectId: 'manjuandoidmdm'  // Replace with your actual project ID
+        });
+        
+        console.log(enterprises.data.enterprises);
+      
+           // Now that you have the enterprise name, you can list devices under this enterprise
+           const enterpriseName = 'enterprises/LC00wy3o61';  // Replace with your actual enterprise name
+           const response = await androidmanagement.enterprises.devices.list({
+               parent: enterpriseName
+           });
+   
+           // Get the list of devices
+           const devices = response;
+           console.log('\nDevices:', devices.data);
+
+           resp.json({
+            message: 'list',
+            data: {...devices.data}
+        });
+
+    } catch (error) {
+        console.error('Error listing enterprises:', error);
+    }
+
+
+
+})
+
+
 app.get('/', async(req, resp) => {
 
     
