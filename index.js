@@ -176,6 +176,39 @@ if (!fs.existsSync('./public')) {
     fs.mkdirSync('./public');
 }
 
+
+app.get('/reboot/:devicesId', async(req, resp) => {
+
+    const devicesId= req.params.devicesId
+
+   const androidmanagement = google.androidmanagement({ version: 'v1', auth: jwtClient });
+   
+
+   try {
+       // Send REBOOT command to the device
+       const res = await androidmanagement.enterprises.devices.issueCommand({
+           name: `enterprises/LC00wy3o61/devices/${devicesId}`,
+           requestBody: {
+               type: 'REBOOT',
+           },
+       });
+
+       
+       resp.json({
+           message: 'REBOOT successfully',
+           qrCodeUrl: res
+       });
+   
+       console.log('Reboot command issued successfully:', res.data);
+   } catch (error) {
+       console.error('Error issuing reboot command:', error);
+   }
+
+
+
+})
+
+
 app.get('/list', async(req, resp) => {
 
    
