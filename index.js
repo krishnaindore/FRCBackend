@@ -3,10 +3,19 @@ const { google } = require('googleapis');
 const path = require('path');
 const readline = require('readline');
 const QRCode = require('qrcode');
-
 const fs = require('fs');
+const userRoutes = require('./routes/userRoutes.js');
 
 const app = express();
+
+
+
+app.use(express.json()); // Middleware to parse JSON requests
+
+// Use user routes
+app.use('/users', userRoutes);
+
+
 const port = 3000;
 
 // Load your service account key JSON file
@@ -196,11 +205,16 @@ app.get('/reboot/:devicesId', async(req, resp) => {
        
        resp.json({
            message: 'REBOOT successfully',
-           qrCodeUrl: res
+           data:  res.status
        });
    
-       console.log('Reboot command issued successfully:', res.data);
+       //console.log('Reboot command issued successfully:', res.data);
    } catch (error) {
+
+    resp.json({
+        message: error.errors ,
+        data: error.status,  
+    });
        console.error('Error issuing reboot command:', error);
    }
 
